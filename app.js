@@ -1,64 +1,50 @@
-// --- Map setup ---
-const map = L.map('map').setView([8.953, 125.55], 13);
+// --- Map (zoom buttons moved to bottom-right) ---
+const map = L.map('map', { zoomControl: false }).setView([8.953, 125.55], 13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
+L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-const statusEl = document.getElementById('status');
+// UI refs
+const tray = document.getElementById('tray');
+const toggleBtn = document.getElementById('routesToggle');
 const routesListEl = document.getElementById('routesList');
 const btnShowAll = document.getElementById('btnShowAll');
 const btnHideAll = document.getElementById('btnHideAll');
 
-// Status only visible when we explicitly show it
-function setStatus(msg) {
-  if (!msg) {
-    statusEl.textContent = '';
-    statusEl.classList.remove('show');
-  } else {
-    statusEl.textContent = msg;
-    statusEl.classList.add('show');
-  }
-}
+// Toggle tray open/close
+toggleBtn.addEventListener('click', () => {
+  const open = !tray.classList.contains('open');
+  tray.classList.toggle('open', open);
+  toggleBtn.setAttribute('aria-expanded', String(open));
+});
 
+// Data
 let ROUTES = [];
-const ROUTE_LAYERS = new Map(); // id -> Leaflet layer
+const ROUTE_LAYERS = new Map();
 
-// --- Load route1.json ... route7.json (skip missing) ---
+// Load route1.json ... route7.json (skip missing)
 (async () => {
-  try {
-    const filenames = Array.from({ length: 7 }, (_, i) => `route${i + 1}.json`);
+  const filenames = Array.from({ length: 7 }, (_, i) => `route${i + 1}.json`);
+  const results = await Promise.allSettled(
+    filenames.map(async (url) => {
+      const r = await fetch(url, { cache: 'no-cache' });
+      if (!r.ok) throw new Error(`Missing ${url}`);
+      const data = await r.json();
+      if (!data?.id || !data?.geojson) throw new Error(`${url} invalid`);
+      return data;
+    })
+  );
 
-    const results = await Promise.allSettled(
-      filenames.map(async (url) => {
-        const r = await fetch(url, { cache: 'no-cache' });
-        if (!r.ok) throw new Error(`Missing ${url}`);
-        const data = await r.json(); // expects { id, name, color, geojson }
-        if (!data?.id || !data?.geojson) throw new Error(`${url} has invalid shape`);
-        return data;
-      })
-    );
+  ROUTES = results.filter(x => x.status === 'fulfilled').map(x => x.value);
+  if (ROUTES.length === 0) return;
 
-    // Keep only successful loads
-    ROUTES = results
-      .filter(res => res.status === 'fulfilled')
-      .map(res => res.value);
-
-    if (ROUTES.length === 0) {
-      setStatus('No route files found (route1.json–route7.json).');
-      return;
-    }
-
-    renderRoutesList(ROUTES);
-    addRoutesToMap(ROUTES);  // layers created but NOT added by default
-    // No fitToAllVisible(); // start with a clean map
-    setStatus(''); // hide status (no "Loaded X routes")
-  } catch (err) {
-    setStatus('Error: ' + err.message);
-  }
+  renderRoutesList(ROUTES);
+  addRoutesToMap(ROUTES);
 })();
 
-// --- Build the checkbox list ---
+// Build the checkbox list
 function renderRoutesList(routes) {
   routesListEl.innerHTML = '';
   routes.forEach(route => {
@@ -69,15 +55,12 @@ function renderRoutesList(routes) {
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.id = id;
-    cb.checked = false; // start UNCHECKED so nothing shows by default
+    cb.checked = false;
+
     cb.addEventListener('change', () => {
       const layer = ROUTE_LAYERS.get(route.id);
       if (!layer) return;
-      if (cb.checked) {
-        layer.addTo(map);
-      } else {
-        map.removeLayer(layer);
-      }
+      if (cb.checked) layer.addTo(map); else map.removeLayer(layer);
       fitToAllVisible();
     });
 
@@ -97,35 +80,29 @@ function renderRoutesList(routes) {
 
   btnShowAll.onclick = () => setAllVisibility(true);
   btnHideAll.onclick = () => setAllVisibility(false);
-
-  function setAllVisibility(show) {
-    ROUTES.forEach(route => {
-      const cb = document.getElementById(`route-${route.id}`);
-      if (cb) cb.checked = show;
-      const layer = ROUTE_LAYERS.get(route.id);
-      if (!layer) return;
-      if (show) {
-        layer.addTo(map);
-      } else {
-        map.removeLayer(layer);
-      }
-    });
-    fitToAllVisible();
-  }
 }
 
-// --- Add GeoJSON layers to the map (create but do NOT show yet) ---
+function setAllVisibility(show) {
+  ROUTES.forEach(route => {
+    const cb = document.getElementById(`route-${route.id}`);
+    if (cb) cb.checked = show;
+    const layer = ROUTE_LAYERS.get(route.id);
+    if (!layer) return;
+    if (show) layer.addTo(map); else map.removeLayer(layer);
+  });
+  fitToAllVisible();
+}
+
+// Add GeoJSON layers
 function addRoutesToMap(routes) {
   routes.forEach(route => {
     const style = { color: route.color || '#e11d48', weight: 5, opacity: 0.9 };
-    const layer = L.geoJSON(route.geojson, { style })
-      .bindPopup(route.name || `Route ${route.id}`);
-    // NOTE: don't addTo(map) here — start hidden
+    const layer = L.geoJSON(route.geojson, { style }).bindPopup(route.name || `Route ${route.id}`);
     ROUTE_LAYERS.set(route.id, layer);
   });
 }
 
-// --- Fit map bounds to visible routes ---
+// Fit map to visible routes
 function fitToAllVisible() {
   const visible = [];
   ROUTE_LAYERS.forEach(layer => { if (map.hasLayer(layer)) visible.push(layer); });

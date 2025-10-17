@@ -1,61 +1,53 @@
 html, body { height: 100%; margin: 0; }
 #map { height: 100%; }
 
-/* Panel */
-.panel {
-  position: absolute; z-index: 1000; top: 12px; left: 12px;
-  background: #fff; padding: 12px; border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.18);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  max-width: 320px; width: 320px;
-  max-height: 80vh;                /* prevent oversized panel */
-  overflow: auto;                  /* scroll when content is long */
+/* Collapsible toggle button */
+.tray-toggle {
+  position: absolute; z-index: 1000; left: 12px; top: 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  width: calc(100vw - 24px); max-width: 360px;
+  padding: 10px 12px; background: #fff; color: #111;
+  border: 1px solid #e6e6e6; border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.14);
+  font: 600 16px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  cursor: pointer;
 }
+.tray-toggle .chev { transition: transform .2s ease; }
+.tray-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
 
-h1 { font-size: 18px; margin: 0 0 8px; line-height: 1.2; }
+/* Tray panel */
+.tray {
+  position: absolute; z-index: 999; left: 12px; top: 66px;
+  width: calc(100vw - 24px); max-width: 360px;
+  background: #fff; border: 1px solid #e6e6e6; border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.16);
+  padding: 10px 12px; display: none;
+}
+.tray.open { display: block; }
 
-.panel .section { margin-top: 10px; }
-.panel .panel-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-
+.panel-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
 button {
-  display: inline-block;
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  background: #111;
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
+  display: inline-block; padding: 8px 12px; border-radius: 10px;
+  border: 1px solid #ddd; background: #111; color: #fff; cursor: pointer; font-size: 14px;
 }
 button.secondary { background: #fff; color: #111; }
 button.small { padding: 6px 10px; font-size: 12px; }
-
-/* Status only shows when there is an error/info we explicitly set */
-.msg { font-size: 12px; color: #555; margin-top: 6px; white-space: pre-line; display: none; }
-.msg.show { display: block; }
 
 .routes-list { display: grid; grid-template-columns: 1fr; gap: 6px; max-height: 50vh; overflow: auto; }
 .route-item {
   display: flex; align-items: center; gap: 8px;
   border: 1px solid #eee; border-radius: 10px; padding: 6px 8px;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
+.route-item input { width: 18px; height: 18px; }
 .route-swatch { width: 12px; height: 12px; border-radius: 3px; border: 1px solid #ddd; }
 .route-name { font-size: 13px; }
 
-/* Mobile tweaks */
-@media (max-width: 640px) {
-  .panel {
-    width: calc(100% - 24px);
-    max-width: none;
-    padding: 10px;
-    max-height: 60vh;            /* smaller on mobile */
-  }
-  h1 { font-size: 16px; }
-  .panel .panel-title { font-size: 13px; }
-  .routes-list { max-height: 40vh; }  /* less tall list on mobile */
-  .route-name { font-size: 12px; }
-  button { font-size: 13px; padding: 7px 10px; }
-  button.small { font-size: 12px; padding: 6px 9px; }
+/* Small screens */
+@media (max-width: 420px) {
+  .tray-toggle { font-size: 15px; padding: 9px 11px; }
+  .route-item { padding: 6px; }
+  .route-name { font-size: 12.5px; }
 }
