@@ -1,7 +1,7 @@
 {
   "id": 4,
-  "name": "Route 4",
-  "color": "#3b82f6",
+  "name": "Route 4: Butuan Integrated Jeepney Terminal →  De Oro Barangay Hall Off-Street Terminal",
+  "color": "#00FF00",
   "geojson": {
     "type": "FeatureCollection",
     "features": [

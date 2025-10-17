@@ -1,7 +1,7 @@
 {
     "id": 2,
-    "name": "Route 2 – Crossing Dumalagan → Langihan Jeepney Terminal",
-    "color": "#eab308",
+    "name": "Route 2: Crossing Dumalagan → Butuan Integrated Jeepney Terminal",
+    "color": "#FF7F00",
     "geojson": {
       "type": "FeatureCollection",
       "features": [

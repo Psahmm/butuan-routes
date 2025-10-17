@@ -1,7 +1,7 @@
 {
     "id": 3,
-    "name": "Route 3 – Libertad → Ampayon",
-    "color": "#2563eb",
+    "name": "Route 3: Libertad Overpass → Ampayon Triangle Off-Street Terminal",
+    "color": "#FFFF00",
     "geojson": {
       "type": "FeatureCollection",
       "features": [
