@@ -10,7 +10,16 @@ const routesListEl = document.getElementById('routesList');
 const btnShowAll = document.getElementById('btnShowAll');
 const btnHideAll = document.getElementById('btnHideAll');
 
-function setStatus(msg) { statusEl.textContent = msg; }
+// Status only visible when we explicitly show it
+function setStatus(msg) {
+  if (!msg) {
+    statusEl.textContent = '';
+    statusEl.classList.remove('show');
+  } else {
+    statusEl.textContent = msg;
+    statusEl.classList.add('show');
+  }
+}
 
 let ROUTES = [];
 const ROUTE_LAYERS = new Map(); // id -> Leaflet layer
@@ -41,9 +50,9 @@ const ROUTE_LAYERS = new Map(); // id -> Leaflet layer
     }
 
     renderRoutesList(ROUTES);
-    addRoutesToMap(ROUTES);
-    fitToAllVisible();
-    setStatus(`Loaded ${ROUTES.length} route(s).`);
+    addRoutesToMap(ROUTES);  // layers created but NOT added by default
+    // No fitToAllVisible(); // start with a clean map
+    setStatus(''); // hide status (no "Loaded X routes")
   } catch (err) {
     setStatus('Error: ' + err.message);
   }
@@ -60,11 +69,15 @@ function renderRoutesList(routes) {
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.id = id;
-    cb.checked = true;
+    cb.checked = false; // start UNCHECKED so nothing shows by default
     cb.addEventListener('change', () => {
       const layer = ROUTE_LAYERS.get(route.id);
       if (!layer) return;
-      if (cb.checked) layer.addTo(map); else map.removeLayer(layer);
+      if (cb.checked) {
+        layer.addTo(map);
+      } else {
+        map.removeLayer(layer);
+      }
       fitToAllVisible();
     });
 
@@ -91,19 +104,23 @@ function renderRoutesList(routes) {
       if (cb) cb.checked = show;
       const layer = ROUTE_LAYERS.get(route.id);
       if (!layer) return;
-      if (show) layer.addTo(map); else map.removeLayer(layer);
+      if (show) {
+        layer.addTo(map);
+      } else {
+        map.removeLayer(layer);
+      }
     });
     fitToAllVisible();
   }
 }
 
-// --- Add GeoJSON layers to the map ---
+// --- Add GeoJSON layers to the map (create but do NOT show yet) ---
 function addRoutesToMap(routes) {
   routes.forEach(route => {
     const style = { color: route.color || '#e11d48', weight: 5, opacity: 0.9 };
     const layer = L.geoJSON(route.geojson, { style })
       .bindPopup(route.name || `Route ${route.id}`);
-    layer.addTo(map);
+    // NOTE: don't addTo(map) here — start hidden
     ROUTE_LAYERS.set(route.id, layer);
   });
 }
