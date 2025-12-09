@@ -3,9 +3,6 @@
     "name": "Route 1: Crossing Dumalagan → South Montilla Boulevard Intersection",
     "color": "#FF0000",
     "geojson": {
-      
-      
-      
         "type": "FeatureCollection",
         "features": [
           {
@@ -795,9 +792,7 @@
             }
           }
         ]
-      
       }
-      
     }
   
   

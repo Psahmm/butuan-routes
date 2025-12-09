@@ -3,7 +3,6 @@
     "name": "Route 2: Crossing Dumalagan → Butuan Integrated Jeepney Terminal",
     "color": "#FF7F00",
     "geojson": {
-      
         "type": "FeatureCollection",
         "features": [
           {
@@ -1307,9 +1306,6 @@
             }
           }
         ]
-      
       }
-      
-    
   }
   

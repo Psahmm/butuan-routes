@@ -3,7 +3,6 @@
     "name": "Route 6: Maguinda Covered Court Off-Street Terminal →  Agusan del Norte Provincial Capitol Off-Street Terminal",
     "color": "#4B0082",
     "geojson": {
-      
         "type": "FeatureCollection",
         "features": [
           {
@@ -4606,7 +4605,6 @@
           }
         ]
       }
-        
     }
         
       

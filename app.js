@@ -1,4 +1,4 @@
-// --- Map (zoom buttons moved to bottom-right) ---
+// --- Map Setup ---
 const map = L.map('map', { zoomControl: false }).setView([8.953, 125.55], 13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
@@ -24,7 +24,7 @@ toggleBtn.addEventListener('click', () => {
 let ROUTES = [];
 const ROUTE_LAYERS = new Map();
 
-// Load route1.json ... route7.json (skip missing)
+// Load route1.json ... route7.json
 (async () => {
   const filenames = Array.from({ length: 7 }, (_, i) => `route${i + 1}.json`);
   const results = await Promise.allSettled(
@@ -110,3 +110,40 @@ function fitToAllVisible() {
   const group = L.featureGroup(visible);
   map.fitBounds(group.getBounds(), { padding: [30, 30] });
 }
+
+// --- Locate Me Button Logic ---
+const btnLocate = document.getElementById('btnLocate');
+
+btnLocate.addEventListener('click', () => {
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported by your browser.");
+    return;
+  }
+
+  btnLocate.disabled = true;
+  btnLocate.textContent = "⌛";
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+
+      if (!window._userMarker) {
+        window._userMarker = L.marker([lat, lng]).addTo(map);
+      } else {
+        window._userMarker.setLatLng([lat, lng]);
+      }
+
+      window._userMarker.bindPopup("📍 You are here").openPopup();
+      map.setView([lat, lng], 16);
+
+      btnLocate.disabled = false;
+      btnLocate.textContent = "📍";
+    },
+    (err) => {
+      alert("Unable to get your location: " + err.message);
+      btnLocate.disabled = false;
+      btnLocate.textContent = "📍";
+    }
+  );
+});

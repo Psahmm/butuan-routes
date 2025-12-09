@@ -1,6 +1,29 @@
 html, body { height: 100%; margin: 0; }
 #map { height: 100%; }
 
+/* Locate Me button */
+.locate-btn {
+  position: absolute;
+  z-index: 1000;
+  right: 12px;
+  top: 12px;
+
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+
+  background: #fff;
+  color: #111;
+  font-size: 22px;
+  cursor: pointer;
+
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Collapsible toggle button */
 .tray-toggle {
   position: absolute; z-index: 1000; left: 12px; top: 12px;
@@ -35,7 +58,13 @@ button {
 button.secondary { background: #fff; color: #111; }
 button.small { padding: 6px 10px; font-size: 12px; }
 
-.routes-list { display: grid; grid-template-columns: 1fr; gap: 6px; max-height: 50vh; overflow: auto; }
+.routes-list { 
+  display: grid; 
+  grid-template-columns: 1fr; 
+  gap: 6px; 
+  max-height: 50vh; 
+  overflow: auto; 
+}
 .route-item {
   display: flex; align-items: center; gap: 8px;
   border: 1px solid #eee; border-radius: 10px; padding: 6px 8px;
