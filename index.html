@@ -2,24 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Butuan Multicab – Routes Map</title>
+  <title>GoButuan – Multicab Route Navigator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="map"></div>
 
-  <!-- Locate Me Button -->
-  <button id="btnLocate" class="locate-btn">📍</button>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <button id="routesToggle" class="topbar-left" aria-expanded="false">
+      Show Routes <span class="chev">▾</span>
+    </button>
 
-  <!-- Collapsible header -->
-  <button id="routesToggle" class="tray-toggle" aria-expanded="false">
-    <span class="title">Show Routes</span>
-    <span class="chev">▾</span>
-  </button>
+    <div class="topbar-right">
+      <button id="btnLocate" class="icon-btn">
+        <img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png" class="icon-img">
+      </button>
 
-  <!-- Tray panel -->
+      <button id="btnSearch" class="icon-btn">❔</button>
+    </div>
+  </div>
+
+  <!-- OVERLAY + DIRECTIONS BOX -->
+  <div id="directionsOverlay" class="directions-overlay"></div>
+
+  <div id="directionsBox" class="directions-box">
+    <h3>Directions</h3>
+
+    <!-- START -->
+    <div class="dir-row" id="startRow">
+      <div class="dir-icon">○</div>
+      <input id="startInput" class="dir-input" placeholder="Start location">
+    </div>
+
+    <!-- SWAP BUTTON -->
+    <button id="swapBtn" class="swap-btn">↕</button>
+
+    <!-- DESTINATION -->
+    <div class="dir-row" id="destRow">
+      <div class="dir-icon">📍</div>
+      <input id="destInput" class="dir-input" placeholder="Destination">
+    </div>
+
+    <button id="directionsClose" class="dir-close">Close</button>
+  </div>
+
+  <!-- ROUTES TRAY -->
   <aside id="tray" class="tray">
     <div class="section">
       <div id="routesList" class="routes-list"></div>
@@ -30,7 +62,8 @@
     </div>
   </aside>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-  <script src="app.js" defer></script>
+  <div id="map"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
