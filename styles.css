@@ -147,6 +147,28 @@ html, body {
   cursor: pointer;
 }
 
+/* RECOMMENDED ROUTE CARD */
+.recommended-route-card {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  z-index: 1500;
+  max-width: 90%;
+  font-size: 16px;
+  text-align: center;
+}
+
+.recommended-route-card strong {
+  font-size: 18px;
+  display: block;
+  margin-bottom: 10px;
+}
+
 /* ROUTES TRAY */
 .tray {
   position: absolute;
