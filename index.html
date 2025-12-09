@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>GoButuan – Multicab Route Navigator</title>
+  <title>GoButuan – Route Navigator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -13,42 +13,34 @@
   <!-- TOP BAR -->
   <div class="topbar">
     <button id="routesToggle" class="topbar-left" aria-expanded="false">
-      Show Routes <span class="chev">▾</span>
+      Show Routes ▾
     </button>
 
     <div class="topbar-right">
-      <button id="btnLocate" class="icon-btn">
-        <img src="https://maps.google.com/mapfiles/ms/icons/red-dot.png" class="icon-img">
-      </button>
-
-      <button id="btnSearch" class="icon-btn">❔</button>
+      <button id="btnLocate" class="icon-btn">📍</button>
+      <button id="btnSearch" class="icon-btn">🔎</button>
     </div>
   </div>
 
   <!-- OVERLAY -->
-  <div id="directionsOverlay" class="directions-overlay"></div>
+  <div id="overlay" class="overlay"></div>
 
-  <!-- DIRECTIONS BOX -->
-  <div id="directionsBox" class="directions-box">
-    <h3>Directions</h3>
+  <!-- SEARCH BOX -->
+  <div id="searchBox" class="search-box">
+    <h2 class="sb-title">Search Location</h2>
 
-    <div class="dir-row">
-      <div class="dir-icon">○</div>
-      <input id="startInput" class="dir-input" placeholder="Start location">
+    <div class="input-group">
+      <input id="startInput" class="sb-input" placeholder="Start location">
+      <div id="startList" class="suggestions"></div>
     </div>
 
-    <div id="startSuggestions" class="autocomplete-box"></div>
-
-    <button id="swapBtn" class="swap-btn">↕</button>
-
-    <div class="dir-row">
-      <div class="dir-icon">📍</div>
-      <input id="destInput" class="dir-input" placeholder="Destination">
+    <div class="input-group">
+      <input id="destInput" class="sb-input" placeholder="Destination">
+      <div id="destList" class="suggestions"></div>
     </div>
 
-    <div id="destSuggestions" class="autocomplete-box"></div>
-
-    <button id="directionsClose" class="dir-close">Close</button>
+    <button id="searchConfirm" class="primary-btn">Search</button>
+    <button id="closeSearch" class="secondary-btn">Close</button>
   </div>
 
   <!-- ROUTES TRAY -->
@@ -61,15 +53,6 @@
       </div>
     </div>
   </aside>
-
-  <!-- ROUTE RECOMMENDATION CARD -->
-  <div id="routeCard" class="route-card">
-    <div class="rc-header">
-      <span>Recommended Routes</span>
-      <button id="rcClose" class="rc-close">×</button>
-    </div>
-    <div id="routeCardBody" class="rc-body"></div>
-  </div>
 
   <div id="map"></div>
 

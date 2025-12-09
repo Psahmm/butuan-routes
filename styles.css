@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 html, body {
   margin: 0;
   height: 100%;
@@ -32,14 +36,9 @@ html, body {
   box-shadow: 0 4px 12px rgba(0,0,0,.2);
 }
 
-.topbar-right {
-  display: flex;
-  gap: 10px;
-}
-
 .icon-btn {
-  width: 50px;
-  height: 50px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: white;
   border: none;
@@ -48,87 +47,103 @@ html, body {
   box-shadow: 0 4px 12px rgba(0,0,0,.2);
 }
 
-.icon-img { width: 28px; }
+.topbar-right {
+  display: flex;
+  gap: 10px;
+}
 
-/* DIRECTIONS MODAL */
-.directions-overlay {
+/* OVERLAY */
+.overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.45);
+  background: rgba(0,0,0,.35);
   z-index: 1500;
 }
 
-.directions-box {
+/* SEARCH MODAL */
+.search-box {
   display: none;
   position: fixed;
   top: 50%;
   left: 50%;
-  width: 90%;
+  width: 92%;
   max-width: 360px;
   background: white;
-  padding: 20px;
-  border-radius: 16px;
+  padding: 24px;
+  border-radius: 18px;
   transform: translate(-50%, -50%);
   z-index: 1600;
-  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,.3);
+}
+
+.sb-title {
   text-align: center;
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 700;
 }
 
-.dir-row {
-  display: flex;
-  align-items: center;
-  background: #f7f7f7;
-  padding: 12px;
+.input-group {
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.sb-input {
+  width: 100%;
+  padding: 14px;
   border-radius: 12px;
-  margin-bottom: 10px;
+  background: #fafafa;
+  border: 1px solid #ccc;
+  font-size: 15px;
 }
 
-.dir-icon { margin-right: 8px; font-size: 20px; }
+/* SUGGESTIONS */
+.suggestions {
+  display: none;
+  position: absolute;
+  top: 52px;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 2000;
+}
 
-.dir-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
+.sug-item {
+  padding: 10px 12px;
+  cursor: pointer;
   font-size: 14px;
 }
-
-/* AUTOCOMPLETE */
-.autocomplete-box {
-  display: none;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
-  margin-top: -6px;
+.sug-item:hover {
+  background: #eee;
 }
 
-.ac-item {
-  padding: 8px 12px;
+/* BUTTONS */
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 4px;
+  background: #3b82f6;
+  border: none;
+  color: white;
+  border-radius: 12px;
+  font-size: 16px;
   cursor: pointer;
 }
 
-.ac-item:hover { background: #f0f0f0; }
-
-/* SWAP BUTTON */
-.swap-btn {
-  margin: 8px auto;
-  padding: 6px 12px;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  font-size: 20px;
-}
-
-/* CLOSE BUTTON */
-.dir-close {
+.secondary-btn {
   width: 100%;
   padding: 10px;
+  margin-top: 8px;
   background: #eee;
-  border-radius: 12px;
   border: none;
+  color: #333;
+  border-radius: 12px;
+  font-size: 15px;
   cursor: pointer;
 }
 
@@ -137,89 +152,53 @@ html, body {
   position: absolute;
   top: 70px;
   left: 12px;
-  width: calc(100vw - 24px);
-  max-width: 360px;
   background: white;
+  width: 420px;   /* WIDER */
   padding: 12px;
   border-radius: 16px;
-  border: 1px solid #ddd;
   box-shadow: 0 4px 18px rgba(0,0,0,.2);
   display: none;
   z-index: 1400;
 }
 
-.tray.open { display: block; }
+.tray.open {
+  display: block;
+}
 
 .routes-list {
-  display: grid;
-  gap: 6px;
+  max-height: 55vh;
+  overflow-y: auto;
 }
 
 .route-item {
   display: flex;
   gap: 8px;
   padding: 6px 8px;
-  border-radius: 10px;
   border: 1px solid #eee;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  align-items: center;
+}
+
+.route-item input {
+  width: 18px;
+  height: 18px;
 }
 
 .route-swatch {
   width: 12px;
   height: 12px;
   border-radius: 3px;
+  border: 1px solid #ccc;
 }
 
-/* ROUTE CARD */
-.route-card {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -260px;
-  margin: auto;
-  width: 94%;
-  max-width: 420px;
-  background: white;
-  border-radius: 20px;
-  padding-bottom: 16px;
-  box-shadow: 0 -4px 25px rgba(0,0,0,.25);
-  z-index: 2000;
-  opacity: 0;
-  transition: bottom .35s ease, opacity .35s ease;
-}
-
-.route-card.show {
-  bottom: 14px;
-  opacity: 1;
-}
-
-.rc-header {
-  font-size: 17px;
-  font-weight: bold;
-  padding: 12px 16px;
+.row {
   display: flex;
-  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
 }
 
-.rc-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-.rc-body {
-  padding: 0 16px;
-  margin-bottom: 10px;
-}
-
-.recommended {
-  margin-top: 10px;
-  font-weight: bold;
-  color: #333;
-}
-
-/* PICKUP ICON */
-.pickup-icon {
-  font-size: 30px;
-  line-height: 30px;
+.small {
+  padding: 6px 10px;
+  font-size: 12px;
 }
