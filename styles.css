@@ -1,9 +1,8 @@
-/* BASE */
 html, body {
-  height: 100%;
   margin: 0;
+  height: 100%;
+  overflow: hidden;
   font-family: system-ui, sans-serif;
-  overflow-x: hidden;
 }
 
 #map {
@@ -11,9 +10,7 @@ html, body {
   width: 100%;
 }
 
-/* ============================
-   TOP BAR
-============================ */
+/* TOP BAR */
 .topbar {
   position: absolute;
   top: 12px;
@@ -22,66 +19,44 @@ html, body {
   padding: 0 12px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   z-index: 2000;
-  pointer-events: none;
 }
 
 .topbar-left {
-  pointer-events: auto;
-  background: #fff;
+  background: white;
   padding: 10px 14px;
   border-radius: 14px;
-  border: 1px solid #e6e6e6;
   font-size: 16px;
-  display: flex;
-  gap: 6px;
+  border: 1px solid #ddd;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0,0,0,.2);
-}
-
-.topbar-left .chev {
-  transition: transform .2s;
-}
-
-.topbar-left[aria-expanded="true"] .chev {
-  transform: rotate(180deg);
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
 }
 
 .topbar-right {
   display: flex;
   gap: 10px;
-  pointer-events: auto;
 }
 
 .icon-btn {
   width: 50px;
   height: 50px;
-  background: #fff;
   border-radius: 50%;
+  background: white;
   border: none;
+  font-size: 20px;
   cursor: pointer;
-  font-size: 22px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 4px 14px rgba(0,0,0,.2);
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
 }
 
-.icon-img {
-  width: 28px;
-  height: 28px;
-}
+.icon-img { width: 28px; }
 
-/* ============================
-   DIRECTIONS UI
-============================ */
+/* DIRECTIONS MODAL */
 .directions-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.4);
-  z-index: 2100;
+  background: rgba(0,0,0,.45);
+  z-index: 1500;
 }
 
 .directions-box {
@@ -90,86 +65,92 @@ html, body {
   top: 50%;
   left: 50%;
   width: 90%;
-  max-width: 350px;
+  max-width: 360px;
+  background: white;
   padding: 20px;
-  background: #fff;
-  border-radius: 14px;
+  border-radius: 16px;
   transform: translate(-50%, -50%);
+  z-index: 1600;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
   text-align: center;
-  z-index: 2101;
-  box-shadow: 0 6px 24px rgba(0,0,0,.3);
 }
 
 .dir-row {
   display: flex;
   align-items: center;
   background: #f7f7f7;
+  padding: 12px;
   border-radius: 12px;
-  padding: 10px;
-  margin: 10px 0;
+  margin-bottom: 10px;
 }
 
-.dir-icon {
-  font-size: 20px;
-  margin-right: 10px;
-}
+.dir-icon { margin-right: 8px; font-size: 20px; }
 
 .dir-input {
   flex: 1;
   border: none;
-  outline: none;
   background: transparent;
+  outline: none;
   font-size: 14px;
 }
 
-/* SWAP BUTTON between boxes */
-.swap-btn {
-  display: block;
-  margin: 5px auto;
-  padding: 6px 12px;
-  font-size: 20px;
+/* AUTOCOMPLETE */
+.autocomplete-box {
+  display: none;
+  background: white;
+  border: 1px solid #ddd;
   border-radius: 10px;
-  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  margin-top: -6px;
+}
+
+.ac-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.ac-item:hover { background: #f0f0f0; }
+
+/* SWAP BUTTON */
+.swap-btn {
+  margin: 8px auto;
+  padding: 6px 12px;
+  background: white;
+  border-radius: 10px;
   border: 1px solid #ccc;
   cursor: pointer;
+  font-size: 20px;
 }
 
-/* Close button */
+/* CLOSE BUTTON */
 .dir-close {
   width: 100%;
-  margin-top: 14px;
   padding: 10px;
   background: #eee;
-  border: none;
   border-radius: 12px;
+  border: none;
   cursor: pointer;
 }
 
-/* ============================
-   ROUTES TRAY
-============================ */
+/* ROUTES TRAY */
 .tray {
   position: absolute;
-  top: 66px;
+  top: 70px;
   left: 12px;
   width: calc(100vw - 24px);
   max-width: 360px;
-  background: #fff;
+  background: white;
   padding: 12px;
-  border-radius: 14px;
+  border-radius: 16px;
   border: 1px solid #ddd;
+  box-shadow: 0 4px 18px rgba(0,0,0,.2);
   display: none;
-  z-index: 1500;
-  box-shadow: 0 6px 20px rgba(0,0,0,.15);
+  z-index: 1400;
 }
 
-.tray.open {
-  display: block;
-}
+.tray.open { display: block; }
 
 .routes-list {
-  max-height: 50vh;
-  overflow-y: auto;
   display: grid;
   gap: 6px;
 }
@@ -178,27 +159,67 @@ html, body {
   display: flex;
   gap: 8px;
   padding: 6px 8px;
-  border: 1px solid #eee;
   border-radius: 10px;
+  border: 1px solid #eee;
 }
 
 .route-swatch {
   width: 12px;
   height: 12px;
   border-radius: 3px;
-  border: 1px solid #ddd;
 }
 
-.row { display: flex; gap: 8px; margin-top: 10px; }
-
-button.small {
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-size: 12px;
+/* ROUTE CARD */
+.route-card {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -260px;
+  margin: auto;
+  width: 94%;
+  max-width: 420px;
+  background: white;
+  border-radius: 20px;
+  padding-bottom: 16px;
+  box-shadow: 0 -4px 25px rgba(0,0,0,.25);
+  z-index: 2000;
+  opacity: 0;
+  transition: bottom .35s ease, opacity .35s ease;
 }
 
-button.secondary {
-  background: #fff;
-  border: 1px solid #ccc;
+.route-card.show {
+  bottom: 14px;
+  opacity: 1;
+}
+
+.rc-header {
+  font-size: 17px;
+  font-weight: bold;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.rc-close {
+  background: none;
+  border: none;
+  font-size: 24px;
   cursor: pointer;
+}
+
+.rc-body {
+  padding: 0 16px;
+  margin-bottom: 10px;
+}
+
+.recommended {
+  margin-top: 10px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* PICKUP ICON */
+.pickup-icon {
+  font-size: 30px;
+  line-height: 30px;
 }

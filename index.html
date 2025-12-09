@@ -4,10 +4,8 @@
   <meta charset="utf-8" />
   <title>GoButuan – Multicab Route Navigator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -27,26 +25,28 @@
     </div>
   </div>
 
-  <!-- OVERLAY + DIRECTIONS BOX -->
+  <!-- OVERLAY -->
   <div id="directionsOverlay" class="directions-overlay"></div>
 
+  <!-- DIRECTIONS BOX -->
   <div id="directionsBox" class="directions-box">
     <h3>Directions</h3>
 
-    <!-- START -->
-    <div class="dir-row" id="startRow">
+    <div class="dir-row">
       <div class="dir-icon">○</div>
       <input id="startInput" class="dir-input" placeholder="Start location">
     </div>
 
-    <!-- SWAP BUTTON -->
+    <div id="startSuggestions" class="autocomplete-box"></div>
+
     <button id="swapBtn" class="swap-btn">↕</button>
 
-    <!-- DESTINATION -->
-    <div class="dir-row" id="destRow">
+    <div class="dir-row">
       <div class="dir-icon">📍</div>
       <input id="destInput" class="dir-input" placeholder="Destination">
     </div>
+
+    <div id="destSuggestions" class="autocomplete-box"></div>
 
     <button id="directionsClose" class="dir-close">Close</button>
   </div>
@@ -61,6 +61,15 @@
       </div>
     </div>
   </aside>
+
+  <!-- ROUTE RECOMMENDATION CARD -->
+  <div id="routeCard" class="route-card">
+    <div class="rc-header">
+      <span>Recommended Routes</span>
+      <button id="rcClose" class="rc-close">×</button>
+    </div>
+    <div id="routeCardBody" class="rc-body"></div>
+  </div>
 
   <div id="map"></div>
 

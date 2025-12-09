@@ -10,99 +10,162 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 L.control.zoom({ position: "bottomright" }).addTo(map);
 
 /* ================================
-   MARKERS
+   GLOBAL VARIABLES
 ================================ */
 let startMarker = null;
 let destMarker = null;
+let pickupMarker = null;
+
 let activeField = null;
+let ROUTES = [];
+const ROUTE_LAYERS = new Map();
+
+/* ELEMENTS */
+const startInput = document.getElementById("startInput");
+const destInput = document.getElementById("destInput");
+const startSuggestions = document.getElementById("startSuggestions");
+const destSuggestions = document.getElementById("destSuggestions");
+
+const directionsOverlay = document.getElementById("directionsOverlay");
+const directionsBox = document.getElementById("directionsBox");
+
+const routeCard = document.getElementById("routeCard");
+const routeCardBody = document.getElementById("routeCardBody");
 
 /* ================================
-   OPEN DIRECTIONS UI
+   OPEN DIRECTIONS
 ================================ */
 document.getElementById("btnSearch").onclick = () => {
   activeField = null;
-  document.getElementById("directionsOverlay").style.display = "block";
-  document.getElementById("directionsBox").style.display = "block";
+  clearAutocomplete();
+  hideRouteCard();
+  startInput.value = "";
+  destInput.value = "";
+
+  directionsOverlay.style.display = "block";
+  directionsBox.style.display = "block";
 };
 
 function closeDirections() {
-  document.getElementById("directionsOverlay").style.display = "none";
-  document.getElementById("directionsBox").style.display = "none";
+  directionsOverlay.style.display = "none";
+  directionsBox.style.display = "none";
+  clearAutocomplete();
 }
 
-document.getElementById("directionsOverlay").onclick = closeDirections;
 document.getElementById("directionsClose").onclick = closeDirections;
+directionsOverlay.onclick = closeDirections;
 
 /* ================================
-   SET ACTIVE FIELD
+   AUTOCOMPLETE HELPERS
 ================================ */
-document.getElementById("startInput").onclick = () => activeField = "start";
-document.getElementById("destInput").onclick = () => activeField = "dest";
+function clearAutocomplete() {
+  startSuggestions.style.display = "none";
+  destSuggestions.style.display = "none";
+  startSuggestions.innerHTML = "";
+  destSuggestions.innerHTML = "";
+}
+
+async function fetchSuggestions(q) {
+  const url = `https://nominatim.openstreetmap.org/search?format=json
+    &limit=5
+    &bounded=1
+    &viewbox=125.50,8.99,125.60,8.90
+    &q=${encodeURIComponent(q)}`.replace(/\s+/g, "");
+
+  const res = await fetch(url);
+  return await res.json();
+}
 
 /* ================================
-   SWAP BUTTON
+   AUTOCOMPLETE LOGIC
 ================================ */
-document.getElementById("swapBtn").onclick = () => {
-  const s = document.getElementById("startInput").value;
-  const d = document.getElementById("destInput").value;
+async function handleTyping(inputEl, suggestionsBox, type) {
+  const q = inputEl.value.trim();
+  if (!q) return clearAutocomplete();
 
-  document.getElementById("startInput").value = d;
-  document.getElementById("destInput").value = s;
+  const results = await fetchSuggestions(q);
 
-  const sPos = startMarker ? startMarker.getLatLng() : null;
-  const dPos = destMarker ? destMarker.getLatLng() : null;
+  suggestionsBox.innerHTML = "";
+  suggestionsBox.style.display = "block";
 
-  if (sPos) setDestination(sPos.lat, sPos.lng);
-  if (dPos) setStart(dPos.lat, dPos.lng);
-};
+  results.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "ac-item";
+    row.textContent = item.display_name;
 
-/* ================================
-   MAP CLICK → fill active input
-================================ */
-map.on("click", (e) => {
-  if (!activeField) return;
+    row.onclick = () => {
+      inputEl.value = item.display_name;
 
-  const lat = e.latlng.lat;
-  const lng = e.latlng.lng;
+      if (type === "start") {
+        setStart(item.lat, item.lon, item.display_name);
+      } else {
+        setDestination(item.lat, item.lon, item.display_name);
+        recommendRoute(item.lat, item.lon);
+        closeDirections();
+      }
 
-  if (activeField === "start") setStart(lat, lng);
-  if (activeField === "dest") setDestination(lat, lng);
+      clearAutocomplete();
+    };
+
+    suggestionsBox.appendChild(row);
+  });
+}
+
+/* INPUT LISTENERS */
+startInput.addEventListener("input", () => {
+  activeField = "start";
+  handleTyping(startInput, startSuggestions, "start");
+});
+
+destInput.addEventListener("input", () => {
+  activeField = "dest";
+  handleTyping(destInput, destSuggestions, "dest");
 });
 
 /* ================================
-   SEARCH USING ENTER
+   ENTER KEY HANDLING
 ================================ */
-async function searchAndFill(inputId, type) {
-  const query = document.getElementById(inputId).value.trim();
-  if (!query) return;
+// Enter on start → jump to destination input
+startInput.addEventListener("keypress", e => {
+  if (e.key === "Enter") {
+    destInput.focus();
+    activeField = "dest";
+  }
+});
 
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
-  const res = await fetch(url);
-  const data = await res.json();
+// Enter on destination → search + close modal
+destInput.addEventListener("keypress", async e => {
+  if (e.key === "Enter") {
+    await manualSearch("dest");
+    closeDirections();
+  }
+});
 
-  if (!data.length) {
+async function manualSearch(type) {
+  const q = type === "start" ? startInput.value : destInput.value;
+  const results = await fetchSuggestions(q);
+
+  if (!results.length) {
     alert("Location not found.");
     return;
   }
 
-  const { lat, lon, display_name } = data[0];
+  const best = results[0];
 
-  if (type === "start") setStart(lat, lon, display_name);
-  if (type === "dest") setDestination(lat, lon, display_name);
+  if (type === "start") {
+    setStart(best.lat, best.lon, best.display_name);
+  } else {
+    setDestination(best.lat, best.lon, best.display_name);
+    recommendRoute(best.lat, best.lon);
+  }
+
+  clearAutocomplete();
 }
 
-document.getElementById("startInput").addEventListener("keypress", e => {
-  if (e.key === "Enter") searchAndFill("startInput", "start");
-});
-
-document.getElementById("destInput").addEventListener("keypress", e => {
-  if (e.key === "Enter") searchAndFill("destInput", "dest");
-});
-
 /* ================================
-   MARKER SETTERS
+   SET MARKERS
 ================================ */
-function setStart(lat, lng, label = "Start location") {
+function setStart(lat, lng, label="Start") {
   if (startMarker) map.removeLayer(startMarker);
 
   startMarker = L.marker([lat, lng], {
@@ -112,11 +175,10 @@ function setStart(lat, lng, label = "Start location") {
     })
   }).addTo(map);
 
-  document.getElementById("startInput").value = label;
-  map.setView([lat, lng], 15);
+  startInput.value = label;
 }
 
-function setDestination(lat, lng, label = "Destination") {
+function setDestination(lat, lng, label="Destination") {
   if (destMarker) map.removeLayer(destMarker);
 
   destMarker = L.marker([lat, lng], {
@@ -126,25 +188,80 @@ function setDestination(lat, lng, label = "Destination") {
     })
   }).addTo(map);
 
-  document.getElementById("destInput").value = label;
-  map.setView([lat, lng], 15);
+  destInput.value = label;
 }
 
 /* ================================
-   GPS
+   MAP CLICK HANDLING
+================================ */
+map.on("click", (e) => {
+  if (!activeField) return;
+
+  const { lat, lng } = e.latlng;
+
+  if (activeField === "start") {
+    setStart(lat, lng, `(${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+  } else {
+    setDestination(lat, lng, `(${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+    recommendRoute(lat, lng);
+    closeDirections();
+  }
+
+  clearAutocomplete();
+});
+
+/* ================================
+   SWAP MARKERS
+================================ */
+document.getElementById("swapBtn").onclick = () => {
+  const sVal = startInput.value;
+  const dVal = destInput.value;
+
+  startInput.value = dVal;
+  destInput.value = sVal;
+
+  const sPos = startMarker ? startMarker.getLatLng() : null;
+  const dPos = destMarker ? destMarker.getLatLng() : null;
+
+  if (sPos) setDestination(sPos.lat, sPos.lng);
+  if (dPos) setStart(dPos.lat, dPos.lng);
+
+  activeField = "dest";
+};
+
+/* ================================
+   GPS BUTTON
 ================================ */
 document.getElementById("btnLocate").onclick = () => {
   if (!navigator.geolocation) return alert("Geolocation not supported.");
 
   navigator.geolocation.getCurrentPosition(
     pos => {
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
-      setStart(lat, lng, "My Location");
+      const { latitude, longitude } = pos.coords;
+      setStart(latitude, longitude, "My Location");
     },
-    () => alert("Unable to get your location.")
+    () => alert("Could not get your location.")
   );
 };
+
+/* ================================
+   LOAD ROUTES (1–7)
+================================ */
+(async () => {
+  const files = Array.from({ length: 7 }, (_, i) => `route${i + 1}.json`);
+
+  const results = await Promise.allSettled(
+    files.map(async f => {
+      const r = await fetch(f);
+      return r.ok ? r.json() : null;
+    })
+  );
+
+  ROUTES = results.filter(r => r.value).map(r => r.value);
+
+  renderRoutesList();
+  addRoutesToMap();
+})();
 
 /* ================================
    ROUTES TRAY
@@ -154,23 +271,7 @@ document.getElementById("routesToggle").onclick = () => {
   tray.classList.toggle("open");
 };
 
-let ROUTES = [];
-const ROUTE_LAYERS = new Map();
-
-(async () => {
-  const files = Array.from({ length: 7 }, (_, i) => `route${i + 1}.json`);
-  const results = await Promise.allSettled(
-    files.map(async file => {
-      const r = await fetch(file);
-      return r.ok ? r.json() : null;
-    })
-  );
-
-  ROUTES = results.filter(r => r.value).map(r => r.value);
-  renderRoutesList();
-  addRoutesToMap();
-})();
-
+/* RENDER CHECKBOXES */
 function renderRoutesList() {
   const list = document.getElementById("routesList");
   list.innerHTML = "";
@@ -184,6 +285,7 @@ function renderRoutesList() {
 
     cb.onchange = () => {
       const layer = ROUTE_LAYERS.get(route.id);
+
       if (cb.checked) {
         layer.addTo(map);
         zoomRoute(route.id);
@@ -196,10 +298,10 @@ function renderRoutesList() {
     swatch.className = "route-swatch";
     swatch.style.background = route.color;
 
-    const txt = document.createElement("span");
-    txt.textContent = route.name;
+    const name = document.createElement("span");
+    name.textContent = route.name;
 
-    row.append(cb, swatch, txt);
+    row.append(cb, swatch, name);
     list.appendChild(row);
   });
 
@@ -207,24 +309,194 @@ function renderRoutesList() {
   document.getElementById("btnHideAll").onclick = () => toggleRoutes(false);
 }
 
+function toggleRoutes(show) {
+  ROUTES.forEach(route => {
+    const layer = ROUTE_LAYERS.get(route.id);
+    if (layer) show ? layer.addTo(map) : map.removeLayer(layer);
+  });
+}
+
+/* ADD ROUTE LAYERS */
 function addRoutesToMap() {
   ROUTES.forEach(route => {
     const layer = L.geoJSON(route.geojson, {
       style: { color: route.color, weight: 5 }
     });
-    ROUTE_LAYERS.set(route.id, layer);
-  });
-}
 
-function toggleRoutes(show) {
-  ROUTES.forEach(route => {
-    const layer = ROUTE_LAYERS.get(route.id);
-    show ? layer.addTo(map) : map.removeLayer(layer);
+    ROUTE_LAYERS.set(route.id, layer);
   });
 }
 
 function zoomRoute(id) {
   const layer = ROUTE_LAYERS.get(id);
   if (!layer) return;
-  try { map.fitBounds(layer.getBounds(), { padding: [40, 40] }); } catch {}
+
+  try {
+    map.fitBounds(layer.getBounds(), { padding: [40, 40] });
+  } catch {}
 }
+
+/* ================================
+   DISTANCE / GEOMETRY HELPERS
+================================ */
+function dist(a, b) {
+  const R = 6371e3;
+  const dLat = (b.lat - a.lat) * Math.PI/180;
+  const dLng = (b.lng - a.lng) * Math.PI/180;
+
+  const lat1 = a.lat * Math.PI/180;
+  const lat2 = b.lat * Math.PI/180;
+
+  const h = Math.sin(dLat/2)**2 +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(dLng/2)**2;
+
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+function getRouteDistanceToPoint(lat, lng, route) {
+  let minDist = Infinity;
+  let nearestPoint = null;
+
+  L.geoJSON(route.geojson).eachLayer(layer => {
+    if (layer instanceof L.Polyline) {
+      const pts = layer.getLatLngs();
+
+      pts.forEach(p => {
+        const d = dist({lat, lng}, {lat: p.lat, lng: p.lng});
+
+        if (d < minDist) {
+          minDist = d;
+          nearestPoint = p;
+        }
+      });
+    }
+  });
+
+  return { minDist, nearestPoint };
+}
+
+/* ================================
+   ROUTE RECOMMENDATION ENGINE
+================================ */
+function recommendRoute(destLat, destLng) {
+
+  if (!startMarker) {
+    alert("Please set your start point.");
+    return;
+  }
+
+  const startPos = startMarker.getLatLng();
+
+  let validRoutes = [];
+  let routeInfo = [];
+
+  ROUTES.forEach(route => {
+    const nearStart = getRouteDistanceToPoint(startPos.lat, startPos.lng, route);
+    const nearDest = getRouteDistanceToPoint(destLat, destLng, route);
+
+    // Both within ~300m threshold
+    if (nearDest.minDist < 300) {
+      validRoutes.push(route);
+    }
+
+    routeInfo.push({
+      route,
+      distStart: nearStart.minDist,
+      distDest: nearDest.minDist,
+      pickupPoint: nearStart.nearestPoint
+    });
+  });
+
+  if (validRoutes.length === 0) {
+    routeInfo.sort((a, b) => a.distDest - b.distDest);
+    const best = routeInfo[0];
+
+    showRouteCard(`
+      <p><b>Recommended Route:</b> ${best.route.name}</p>
+      <p>Go to the 🚗 marked pickup point to catch the multicab.</p>
+    `);
+
+    highlightRoute(best.route.id);
+    putPickupMarker(best.pickupPoint);
+
+    return;
+  }
+
+  validRoutes.sort((a, b) => {
+    const ad = getRouteDistanceToPoint(destLat, destLng, a).minDist;
+    const bd = getRouteDistanceToPoint(destLat, destLng, b).minDist;
+    return ad - bd;
+  });
+
+  const recommended = validRoutes[0];
+
+  const others = validRoutes.slice(1)
+    .map(r => r.name)
+    .join(", ");
+
+  let text = `
+    <p><b>Recommended Route:</b> ${recommended.name}</p>
+    <p>You can catch the multicab near your location.</p>
+  `;
+
+  if (others.length > 0) {
+    text += `<p>Other possible routes: ${others}</p>`;
+  }
+
+  showRouteCard(text);
+
+  highlightRoute(recommended.id);
+
+  if (pickupMarker) {
+    map.removeLayer(pickupMarker);
+    pickupMarker = null;
+  }
+}
+
+/* ================================
+   PICKUP MARKER (🚗)
+================================ */
+function putPickupMarker(p) {
+  if (!p) return;
+
+  if (pickupMarker) map.removeLayer(pickupMarker);
+
+  pickupMarker = L.marker([p.lat, p.lng], {
+    icon: L.divIcon({
+      className: "pickup-icon",
+      html: "🚗",
+      iconSize: [30, 30],
+      iconAnchor: [15, 15]
+    })
+  }).addTo(map);
+
+  map.setView([p.lat, p.lng], 16);
+}
+
+/* ================================
+   ROUTE HIGHLIGHTING
+================================ */
+function highlightRoute(id) {
+  ROUTES.forEach(r => {
+    const layer = ROUTE_LAYERS.get(r.id);
+    if (layer) map.removeLayer(layer);
+  });
+
+  const layer = ROUTE_LAYERS.get(id);
+  if (layer) layer.addTo(map);
+}
+
+/* ================================
+   ROUTE CARD UI
+================================ */
+function showRouteCard(html) {
+  routeCardBody.innerHTML = html;
+  routeCard.classList.add("show");
+}
+
+function hideRouteCard() {
+  routeCard.classList.remove("show");
+}
+
+document.getElementById("rcClose").onclick = hideRouteCard;
